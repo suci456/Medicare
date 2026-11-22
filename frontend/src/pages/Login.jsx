@@ -67,10 +67,16 @@ function Login() {
       else if (data.role === 'doctor') navigate('/doctor/dashboard');
       else navigate('/patient/dashboard');
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          'Invalid credentials. Please verify your email and password.'
-      );
+      if (!err.response) {
+        setError(
+          'Cannot connect to backend server. Please check your network connection or verify VITE_API_BASE_URL on Vercel.'
+        );
+      } else {
+        setError(
+          err.response?.data?.message ||
+            'Invalid credentials. Please verify your email and password.'
+        );
+      }
     } finally {
       setLoading(false);
     }
