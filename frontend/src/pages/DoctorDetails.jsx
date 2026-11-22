@@ -43,19 +43,25 @@ function DoctorDetails() {
       setError('');
       try {
         const [docData, availData] = await Promise.all([
-          fetchDoctorById(id),
-          fetchAvailabilityByDoctor(id),
+          fetchDoctorById(id).catch(() => null),
+          fetchAvailabilityByDoctor(id).catch(() => []),
         ]);
         setDoctor(docData);
-        setAvailabilityList(availData);
+        const validAvail = Array.isArray(availData) ? availData : [];
+        setAvailabilityList(validAvail);
 
-        if (availData.length > 0) {
-          const firstDateStr = new Date(availData[0].date).toISOString().split('T')[0];
+        if (validAvail.length > 0) {
+          const firstDateStr = new Date(validAvail[0].date).toISOString().split('T')[0];
           setSelectedDate(firstDateStr);
-          setAvailableSlots(availData[0].slots || []);
+          setAvailableSlots(Array.isArray(validAvail[0].slots) ? validAvail[0].slots : []);
+        } else {
+          setSelectedDate('');
+          setAvailableSlots([]);
         }
       } catch (err) {
         console.error(err);
+        setAvailabilityList([]);
+        setAvailableSlots([]);
         setError('Doctor details could not be loaded.');
       } finally {
         setLoading(false);
@@ -70,13 +76,14 @@ function DoctorDetails() {
     setError('');
 
     const targetDate = new Date(dateStr);
-    const match = availabilityList.find((av) => {
+    const validAvailList = Array.isArray(availabilityList) ? availabilityList : [];
+    const match = validAvailList.find((av) => {
       const avDate = new Date(av.date);
       return avDate.toDateString() === targetDate.toDateString();
     });
 
-    if (match) {
-      setAvailableSlots(match.slots || []);
+    if (match && Array.isArray(match.slots)) {
+      setAvailableSlots(match.slots);
     } else {
       setAvailableSlots([]);
     }
@@ -231,7 +238,7 @@ function DoctorDetails() {
                 Available Consultation Dates
               </label>
 
-              {availabilityList.length === 0 ? (
+              {!Array.isArray(availabilityList) || availabilityList.length === 0 ? (
                 <p className="text-xs text-[#718278] italic">No published availability slots for this physician.</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
@@ -256,7 +263,7 @@ function DoctorDetails() {
                           {new Date(av.date).getDate()}
                         </span>
                         <span className={`block text-[10px] font-semibold ${isSelected ? 'text-[#D9EEE1]' : 'text-[#527765]'}`}>
-                          {av.slots?.length || 0} Slots
+                          {Array.isArray(av.slots) ? av.slots.length : 0} Slots
                         </span>
                       </button>
                     );
@@ -271,7 +278,7 @@ function DoctorDetails() {
                 Available Time Slots
               </label>
 
-              {availableSlots.length === 0 ? (
+              {!Array.isArray(availableSlots) || availableSlots.length === 0 ? (
                 <p className="text-xs text-[#718278] italic">
                   {selectedDate ? 'No time slots left on this date.' : 'Select a date above to display available times.'}
                 </p>

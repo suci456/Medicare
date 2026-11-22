@@ -2,12 +2,18 @@ import api from './api';
 
 export const fetchAvailabilityByDoctor = async (doctorId) => {
   const { data } = await api.get(`/availability/doctor/${doctorId}`);
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.availability)) return data.availability;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const fetchMyAvailability = async () => {
   const { data } = await api.get('/availability/me');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.availability)) return data.availability;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const addAvailability = async ({ date, slots, doctorId }) => {

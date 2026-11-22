@@ -86,18 +86,21 @@ function AdminDashboard() {
     setError('');
     try {
       const [statsData, docsData, usersData, apptsData] = await Promise.all([
-        fetchAdminStats(),
-        fetchAdminDoctors(),
-        fetchAllUsers(),
-        fetchAllAppointments(),
+        fetchAdminStats().catch(() => ({})),
+        fetchAdminDoctors().catch(() => []),
+        fetchAllUsers().catch(() => []),
+        fetchAllAppointments().catch(() => []),
       ]);
 
-      setStats(statsData);
-      setDoctorsList(docsData);
-      setUsersList(usersData);
-      setAppointmentsList(apptsData);
+      setStats(statsData && typeof statsData === 'object' ? statsData : {});
+      setDoctorsList(Array.isArray(docsData) ? docsData : []);
+      setUsersList(Array.isArray(usersData) ? usersData : []);
+      setAppointmentsList(Array.isArray(apptsData) ? apptsData : []);
     } catch (err) {
       console.error(err);
+      setDoctorsList([]);
+      setUsersList([]);
+      setAppointmentsList([]);
       setError('Failed to fetch administrator records from MongoDB.');
     } finally {
       setLoading(false);
@@ -210,17 +213,22 @@ function AdminDashboard() {
     }
   };
 
+  // Safe array references
+  const validDoctorsList = Array.isArray(doctorsList) ? doctorsList : [];
+  const validUsersList = Array.isArray(usersList) ? usersList : [];
+  const validAppointmentsList = Array.isArray(appointmentsList) ? appointmentsList : [];
+
   // Filter Doctors
-  const filteredDoctors = doctorsList.filter((doc) => {
+  const filteredDoctors = validDoctorsList.filter((doc) => {
     if (doctorStatusFilter === 'all') return true;
     const docStatus = doc.status || 'approved';
     return docStatus === doctorStatusFilter;
   });
 
   // Filter Patient Directory: Fixes the issue where all users (Doctor, Admin) were mixed together!
-  const patientsCount = usersList.filter((u) => u.role === 'patient').length;
+  const patientsCount = validUsersList.filter((u) => u.role === 'patient').length;
   
-  const filteredUsers = usersList.filter((u) => {
+  const filteredUsers = validUsersList.filter((u) => {
     // Role filter
     if (patientRoleFilter !== 'all' && u.role !== patientRoleFilter) {
       return false;
@@ -411,7 +419,7 @@ function AdminDashboard() {
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span>Hospital Appointments ({appointmentsList.length})</span>
+            <span>Hospital Appointments ({validAppointmentsList.length})</span>
           </button>
 
           <button
@@ -752,14 +760,14 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#88A995]/15">
-                  {appointmentsList.length === 0 ? (
+                  {validAppointmentsList.length === 0 ? (
                     <tr>
                       <td colSpan="6" className="py-8 text-center text-[#718278]">
                         No appointment bookings in the database yet.
                       </td>
                     </tr>
                   ) : (
-                    appointmentsList.map((app) => {
+                    validAppointmentsList.map((app) => {
                       const appStatus = app.status || 'pending';
                       return (
                         <tr key={app._id} className="hover:bg-white/60 transition">
@@ -837,7 +845,7 @@ function AdminDashboard() {
                 const events = [];
 
                 // 1. Appointments events
-                appointmentsList.forEach((app) => {
+                validAppointmentsList.forEach((app) => {
                   events.push({
                     id: `app-${app._id}`,
                     type: 'Appointment',
@@ -850,7 +858,7 @@ function AdminDashboard() {
                 });
 
                 // 2. Patient registration events
-                usersList
+                validUsersList
                   .filter((u) => u.role === 'patient')
                   .forEach((p) => {
                     events.push({
@@ -865,7 +873,7 @@ function AdminDashboard() {
                   });
 
                 // 3. Doctor registration events
-                doctorsList.forEach((d) => {
+                validDoctorsList.forEach((d) => {
                   events.push({
                     id: `doc-${d._id}`,
                     type: 'Medical Staff',

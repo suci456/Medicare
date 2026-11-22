@@ -4,22 +4,28 @@ export const fetchDoctors = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
   const url = query ? `/doctors?${query}` : '/doctors';
   const { data } = await api.get(url);
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.doctors)) return data.doctors;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const fetchDoctorById = async (id) => {
   const { data } = await api.get(`/doctors/${id}`);
-  return data;
+  return data && typeof data === 'object' ? data : null;
 };
 
 export const fetchDepartments = async () => {
   const { data } = await api.get('/doctors/departments');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.departments)) return data.departments;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const fetchMyDoctorProfile = async () => {
   const { data } = await api.get('/doctors/me/profile');
-  return data;
+  return data && typeof data === 'object' ? data : null;
 };
 
 export const updateMyDoctorProfile = async (profileData) => {

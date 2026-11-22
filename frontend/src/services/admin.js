@@ -7,7 +7,10 @@ export const fetchAdminStats = async () => {
 
 export const fetchAllUsers = async () => {
   const { data } = await api.get('/admin/users');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.users)) return data.users;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const deleteUser = async (userId) => {
@@ -17,7 +20,10 @@ export const deleteUser = async (userId) => {
 
 export const fetchAdminDoctors = async () => {
   const { data } = await api.get('/doctors?includeAll=true');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.doctors)) return data.doctors;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const createDoctor = async (doctorData) => {

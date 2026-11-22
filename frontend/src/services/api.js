@@ -13,14 +13,24 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 token expiry gracefully
+// Detect and reject invalid HTML responses (e.g. when SPA fallback returns index.html for missing /api routes)
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      // If unauthorized on protected route, optionally clear
-      // but let callers handle error message
+  (response) => {
+    if (
+      typeof response.data === 'string' &&
+      (response.data.trim().startsWith('<!DOCTYPE') ||
+        response.data.trim().startsWith('<html') ||
+        response.data.trim().startsWith('<!doctype'))
+    ) {
+      return Promise.reject(
+        new Error(
+          'API endpoint returned HTML instead of JSON. Verify backend is running and VITE_API_BASE_URL is configured.'
+        )
+      );
     }
+    return response;
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );

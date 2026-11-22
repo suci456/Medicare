@@ -32,9 +32,10 @@ function PatientDashboard() {
     setError('');
     try {
       const data = await fetchMyAppointments();
-      setAppointments(data);
+      setAppointments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+      setAppointments([]);
       setError('Unable to load your appointment history.');
     } finally {
       setLoading(false);
@@ -62,12 +63,14 @@ function PatientDashboard() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingList = appointments.filter((app) => {
+  const validAppointments = Array.isArray(appointments) ? appointments : [];
+
+  const upcomingList = validAppointments.filter((app) => {
     const d = new Date(app.date);
     return d >= today && app.status !== 'cancelled' && app.status !== 'rejected' && app.status !== 'completed';
   });
 
-  const historyList = appointments.filter((app) => {
+  const historyList = validAppointments.filter((app) => {
     const d = new Date(app.date);
     return d < today || app.status === 'cancelled' || app.status === 'rejected' || app.status === 'completed';
   });

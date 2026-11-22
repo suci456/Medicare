@@ -26,12 +26,18 @@ export const bookAppointment = async ({
 
 export const fetchMyAppointments = async () => {
   const { data } = await api.get('/appointments/my');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.appointments)) return data.appointments;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const fetchDoctorAppointments = async () => {
   const { data } = await api.get('/appointments/doctor');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.appointments)) return data.appointments;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };
 
 export const updateAppointmentStatus = async (id, status) => {
@@ -46,5 +52,8 @@ export const cancelAppointment = async (id) => {
 
 export const fetchAllAppointments = async () => {
   const { data } = await api.get('/appointments');
-  return data;
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.appointments)) return data.appointments;
+  if (data && Array.isArray(data.data)) return data.data;
+  return [];
 };

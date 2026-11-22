@@ -35,14 +35,17 @@ function FindDoctors() {
       if (maxFee < 250) params.maxFee = maxFee;
 
       const [docsData, deptsData] = await Promise.all([
-        fetchDoctors(params),
-        fetchDepartments(),
+        fetchDoctors(params).catch(() => []),
+        fetchDepartments().catch(() => []),
       ]);
 
-      setDoctors(docsData);
-      setDepartments(['All', ...deptsData]);
+      setDoctors(Array.isArray(docsData) ? docsData : []);
+      const validDepts = Array.isArray(deptsData) ? deptsData : [];
+      setDepartments(['All', ...validDepts]);
     } catch (err) {
       console.error(err);
+      setDoctors([]);
+      setDepartments(['All']);
       setError('Unable to fetch doctors list. Please check your connection.');
     } finally {
       setLoading(false);
@@ -104,11 +107,12 @@ function FindDoctors() {
                 onChange={(e) => setSelectedDept(e.target.value)}
                 className="w-full glass-input text-xs px-3.5 py-3 rounded-xl text-[#263B30] focus:outline-none"
               >
-                {departments.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
+                {Array.isArray(departments) &&
+                  departments.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -134,8 +138,14 @@ function FindDoctors() {
 
         {/* Error Alert */}
         {error && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-4 rounded-2xl flex items-center gap-2.5">
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-4 rounded-2xl flex items-center justify-between gap-2.5">
             <span>{error}</span>
+            <button
+              onClick={loadDoctorsList}
+              className="text-[11px] underline font-bold hover:text-rose-900"
+            >
+              Retry
+            </button>
           </div>
         )}
 
@@ -145,7 +155,7 @@ function FindDoctors() {
             <div className="w-8 h-8 border-3 border-[#527765] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-xs text-[#718278]">Loading verified medical faculty...</p>
           </div>
-        ) : doctors.length === 0 ? (
+        ) : !Array.isArray(doctors) || doctors.length === 0 ? (
           <div className="glass-card rounded-3xl p-12 text-center text-[#718278] text-xs space-y-2 border border-white/80">
             <Stethoscope className="w-8 h-8 text-[#88A995] mx-auto opacity-60" />
             <h3 className="font-bold text-sm text-[#244C3B]">No Doctors Found</h3>

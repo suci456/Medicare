@@ -34,6 +34,7 @@ function Home() {
   const navigate = useNavigate();
   const [featuredDoctors, setFeaturedDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [activeFaq, setActiveFaq] = useState(null);
 
   const [searchForm, setSearchForm] = useState({
@@ -42,17 +43,25 @@ function Home() {
     search: '',
   });
 
+  const loadFeatured = async () => {
+    try {
+      setLoading(true);
+      setLoadError('');
+      const docs = await fetchDoctors();
+      const validDocs = Array.isArray(docs) ? docs : [];
+      setFeaturedDoctors(validDocs.slice(0, 4));
+    } catch (e) {
+      console.error('Failed to load doctors:', e);
+      setFeaturedDoctors([]);
+      setLoadError(
+        e.message || 'Unable to connect to the medical server. Please verify backend service is active.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadFeatured = async () => {
-      try {
-        const docs = await fetchDoctors();
-        setFeaturedDoctors(docs.slice(0, 4));
-      } catch (e) {
-        console.error('Failed to load doctors:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadFeatured();
   }, []);
 
@@ -408,7 +417,18 @@ function Home() {
             <div className="w-8 h-8 border-3 border-[#527765] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-xs text-[#718278]">Loading verified hospital doctors...</p>
           </div>
-        ) : featuredDoctors.length === 0 ? (
+        ) : loadError ? (
+          <div className="glass-card rounded-2xl p-8 text-center text-xs space-y-3 border border-amber-200/60 bg-amber-50/40 max-w-xl mx-auto">
+            <p className="text-[#263B30] font-semibold">{loadError}</p>
+            <button
+              onClick={loadFeatured}
+              className="px-4 py-2 rounded-xl bg-[#527765] hover:bg-[#3D5B4D] text-white font-bold transition shadow-sm inline-flex items-center gap-1.5"
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>Retry Medical Connection</span>
+            </button>
+          </div>
+        ) : !Array.isArray(featuredDoctors) || featuredDoctors.length === 0 ? (
           <div className="glass-card rounded-2xl p-8 text-center text-[#718278] text-xs">
             No doctors currently listed. Register as doctor or check back soon.
           </div>
@@ -518,7 +538,7 @@ function Home() {
               className="glass-card rounded-3xl p-7 border border-white/80 flex flex-col justify-between space-y-4"
             >
               <div className="flex items-center gap-1 text-amber-500">
-                {[...Array(t.rating)].map((_, i) => (
+                {[...Array(Math.max(1, t.rating || 5))].map((_, i) => (
                   <Star key={i} className="w-4 h-4 fill-amber-500" />
                 ))}
               </div>

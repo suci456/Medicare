@@ -52,16 +52,18 @@ function AppointmentBooking() {
     const init = async () => {
       try {
         const docs = await fetchDoctors();
-        setDoctors(docs);
+        const validDocs = Array.isArray(docs) ? docs : [];
+        setDoctors(validDocs);
         if (initialDoctorId) {
-          const chosen = docs.find((d) => d._id === initialDoctorId);
+          const chosen = validDocs.find((d) => d._id === initialDoctorId);
           if (chosen) setSelectedDoctor(chosen);
-        } else if (docs.length > 0) {
-          setSelectedDoctorId(docs[0]._id);
-          setSelectedDoctor(docs[0]);
+        } else if (validDocs.length > 0) {
+          setSelectedDoctorId(validDocs[0]._id);
+          setSelectedDoctor(validDocs[0]);
         }
       } catch (err) {
         console.error(err);
+        setDoctors([]);
         setError('Failed to fetch doctors list.');
       } finally {
         setLoading(false);
@@ -77,16 +79,17 @@ function AppointmentBooking() {
     const loadDoctorSchedule = async () => {
       try {
         const [docData, availData] = await Promise.all([
-          fetchDoctorById(selectedDoctorId),
-          fetchAvailabilityByDoctor(selectedDoctorId),
+          fetchDoctorById(selectedDoctorId).catch(() => null),
+          fetchAvailabilityByDoctor(selectedDoctorId).catch(() => []),
         ]);
         setSelectedDoctor(docData);
-        setAvailability(availData);
+        const validAvail = Array.isArray(availData) ? availData : [];
+        setAvailability(validAvail);
 
-        if (availData.length > 0) {
-          const firstDateStr = new Date(availData[0].date).toISOString().split('T')[0];
+        if (validAvail.length > 0) {
+          const firstDateStr = new Date(validAvail[0].date).toISOString().split('T')[0];
           setSelectedDate(firstDateStr);
-          setAvailableSlots(availData[0].slots || []);
+          setAvailableSlots(Array.isArray(validAvail[0].slots) ? validAvail[0].slots : []);
         } else {
           setSelectedDate('');
           setAvailableSlots([]);
@@ -94,6 +97,8 @@ function AppointmentBooking() {
         setSelectedSlot('');
       } catch (e) {
         console.error('Error fetching availability:', e);
+        setAvailability([]);
+        setAvailableSlots([]);
       }
     };
 
@@ -232,7 +237,7 @@ function AppointmentBooking() {
                 <span>1. Select Attending Physician</span>
               </div>
 
-              {doctors.length === 0 ? (
+              {!Array.isArray(doctors) || doctors.length === 0 ? (
                 <p className="text-xs text-[#718278]">No approved doctors available currently.</p>
               ) : (
                 <div className="grid grid-cols-1 gap-2.5 max-h-56 overflow-y-auto pr-1">
@@ -271,7 +276,7 @@ function AppointmentBooking() {
                 <span>2. Select Consultation Date</span>
               </div>
 
-              {availability.length === 0 ? (
+              {!Array.isArray(availability) || availability.length === 0 ? (
                 <div className="p-4 bg-[#FAF9F4] rounded-2xl border border-[#88A995]/20 text-xs text-[#718278]">
                   This physician has no open consultation slots listed. Please select another doctor.
                 </div>
@@ -298,7 +303,7 @@ function AppointmentBooking() {
                           {new Date(avail.date).getDate()}
                         </span>
                         <span className={`block text-[10px] font-semibold ${isSelected ? 'text-[#D9EEE1]' : 'text-[#527765]'}`}>
-                          {avail.slots?.length || 0} Slots
+                          {Array.isArray(avail.slots) ? avail.slots.length : 0} Slots
                         </span>
                       </button>
                     );
@@ -314,7 +319,7 @@ function AppointmentBooking() {
                 <span>3. Select Consultation Time Slot</span>
               </div>
 
-              {availableSlots.length === 0 ? (
+              {!Array.isArray(availableSlots) || availableSlots.length === 0 ? (
                 <p className="text-xs text-[#718278] italic">
                   {selectedDate ? 'No open slots on this date.' : 'Select a date above to display available times.'}
                 </p>

@@ -57,12 +57,12 @@ function DoctorDashboard() {
     setError('');
     try {
       const [apptsData, availData, profData] = await Promise.all([
-        fetchDoctorAppointments(),
-        fetchMyAvailability(),
+        fetchDoctorAppointments().catch(() => []),
+        fetchMyAvailability().catch(() => []),
         fetchMyDoctorProfile().catch(() => null),
       ]);
-      setAppointments(apptsData);
-      setAvailability(availData);
+      setAppointments(Array.isArray(apptsData) ? apptsData : []);
+      setAvailability(Array.isArray(availData) ? availData : []);
       if (profData) {
         setDoctorProfile(profData);
         setProfileForm({
@@ -78,6 +78,8 @@ function DoctorDashboard() {
       }
     } catch (err) {
       console.error(err);
+      setAppointments([]);
+      setAvailability([]);
       setError('Unable to load doctor appointments and clinical schedule.');
     } finally {
       setLoading(false);
@@ -157,26 +159,29 @@ function DoctorDashboard() {
   };
 
   // Filter appointments
+  const validAppointments = Array.isArray(appointments) ? appointments : [];
+  const validAvailability = Array.isArray(availability) ? availability : [];
+
   const todayStr = new Date().toDateString();
-  const todayAppointments = appointments.filter((a) => new Date(a.date).toDateString() === todayStr);
+  const todayAppointments = validAppointments.filter((a) => new Date(a.date).toDateString() === todayStr);
 
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
-  const upcomingAppointments = appointments.filter((a) => {
+  const upcomingAppointments = validAppointments.filter((a) => {
     const d = new Date(a.date);
     return d >= now && a.status !== 'cancelled' && a.status !== 'rejected';
   });
 
-  const pendingAppointments = appointments.filter((a) => a.status === 'pending');
-  const acceptedAppointments = appointments.filter((a) => a.status === 'accepted');
+  const pendingAppointments = validAppointments.filter((a) => a.status === 'pending');
+  const acceptedAppointments = validAppointments.filter((a) => a.status === 'accepted');
 
   const displayedAppointments =
     appointmentTab === 'today'
       ? todayAppointments
       : appointmentTab === 'upcoming'
       ? upcomingAppointments
-      : appointments;
+      : validAppointments;
 
   const doctorStatus = doctorProfile?.status || 'approved';
 
@@ -513,24 +518,24 @@ function DoctorDashboard() {
               {/* Active Slots by Day */}
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-[#244C3B] uppercase tracking-wider">
-                  Active Consultation Days ({availability.length})
+                  Active Consultation Days ({validAvailability.length})
                 </h4>
 
-                {availability.length === 0 ? (
+                {validAvailability.length === 0 ? (
                   <p className="text-xs text-[#718278] italic">No active availability slots published.</p>
                 ) : (
                   <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-                    {availability.map((avail) => (
+                    {validAvailability.map((avail) => (
                       <div
                         key={avail._id}
                         className="bg-white/80 p-3 rounded-xl border border-[#88A995]/20 space-y-2 text-xs"
                       >
                         <div className="flex items-center justify-between font-bold text-[#244C3B]">
                           <span>{new Date(avail.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                          <span className="text-[10px] text-[#527765] font-semibold">{avail.slots?.length || 0} Slots</span>
+                          <span className="text-[10px] text-[#527765] font-semibold">{Array.isArray(avail.slots) ? avail.slots.length : 0} Slots</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {avail.slots && avail.slots.map((s) => (
+                          {Array.isArray(avail.slots) && avail.slots.map((s) => (
                             <span
                               key={s}
                               className="inline-flex items-center gap-1.5 bg-[#D9EEE1] text-[#244C3B] px-2.5 py-1 rounded-md text-[10px] font-semibold border border-[#88A995]/30"
