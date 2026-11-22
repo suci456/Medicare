@@ -149,3 +149,30 @@ Generates production-optimized static assets in `frontend/dist`.
     - `PORT=5000`
     - `MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/medicare?retryWrites=true&w=majority`
     - `JWT_SECRET=YourSuperSecretKeyHere`
+
+---
+
+## 📦 Project Submission Details
+
+### 1. Source Code Repository
+To push this project to your GitHub repository:
+```powershell
+# From the project root (D:\Medicare)
+git remote add origin https://github.com/<your-username>/<your-repo-name>.git
+git branch -M main
+git push -u origin main
+```
+
+### 2. Default Credentials for Testing
+- **Administrator**: `admin@medicare.com` / `admin123`
+- **Doctor**: Register a new doctor account on `/register` or log in with an approved doctor.
+- **Patient**: Register a new patient account on `/register` or book appointments directly.
+
+### 3. Submission Checklist
+- [x] Responsive design across Desktop, Tablet, and Mobile screens.
+- [x] Full-stack functionality: Patient registration, Doctor approval, Slot management, Real-time appointment booking.
+- [x] Sage & Mint Glassmorphism UI redesign with medical cross symbols and healthcare badges.
+- [x] Patient Directory displays only registered patients with role switchers.
+- [x] Recent Activity displays real hospital operational events.
+- [x] MongoDB Atlas integration without automatic demo data insertion.
+
