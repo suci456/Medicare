@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediCare Hospital - Premium Healthcare & Clinical Center</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            // Sage & Mint Healthcare Palette
+            sage: {
+              DEFAULT: '#88A995',
+              50: '#F5F8F6',
+              100: '#E6EFE9',
+              200: '#D0E1D6',
+              300: '#B0CDBB',
+              400: '#88A995', // Primary Sage Green
+              500: '#6C947C',
+              600: '#527765', // Deep Sage
+              700: '#3D5B4D',
+              800: '#2A4035',
+              900: '#244C3B', // Forest Green
+            },
+            deepsage: {
+              DEFAULT: '#527765',
+              hover: '#426152',
+            },
+            mint: {
+              DEFAULT: '#D9EEE1',
+              50: '#F7FCF9',
+              100: '#EDF7F0', // Light Mint
+              200: '#D9EEE1', // Soft Mint
+              300: '#BFDEC9',
+              400: '#9ECCA9',
+              500: '#7EBA8C',
+            },
+            softmint: '#D9EEE1',
+            lightmint: '#EDF7F0',
+            ivory: {
+              DEFAULT: '#FAF9F4', // Ivory background
+              50: '#FDFDFC',
+              100: '#FAF9F4',
+              200: '#F4F2E6',
+              300: '#EDE9D4',
+            },
+            forest: {
+              DEFAULT: '#244C3B', // Forest Green headings
+              900: '#1A382B',
+            },
+            greygreen: {
+              DEFAULT: '#718278', // Grey Green secondary text
+              light: '#8E9E95',
+            },
+            maintext: {
+              DEFAULT: '#263B30', // Main Text
+            },
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(82, 119, 101, 0.08)',
+            'glass-hover': '0 14px 40px -5px rgba(82, 119, 101, 0.16)',
+            'soft': '0 4px 20px -2px rgba(36, 76, 59, 0.05)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAF9F4;
+      color: #263B30;
+      overflow-x: hidden;
+    }
+
+    /* Glassmorphism Classes */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px -10px rgba(82, 119, 101, 0.08);
+    }
+
+    .glass-card-subtle {
+      background: rgba(250, 249, 244, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(217, 238, 225, 0.65);
+    }
+
+    .glass-nav-sage {
+      background: rgba(250, 249, 244, 0.90);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(136, 169, 149, 0.25);
+    }
+
+    .glass-modal {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(217, 238, 225, 0.8);
+      box-shadow: 0 25px 50px -12px rgba(36, 76, 59, 0.18);
+    }
+
+    .glass-input {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(136, 169, 149, 0.35);
+      transition: all 0.2s ease;
+    }
+    .glass-input:focus {
+      background: rgba(255, 255, 255, 0.98);
+      border-color: #527765;
+      box-shadow: 0 0 0 3px rgba(136, 169, 149, 0.25);
+    }
+
+    /* Ambient Sage & Mint Gradients */
+    .sage-mesh-bg {
+      background: radial-gradient(circle at 15% 15%, rgba(217, 238, 225, 0.7) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 25%, rgba(237, 247, 240, 0.85) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 85%, rgba(136, 169, 149, 0.15) 0%, transparent 50%),
+                  #FAF9F4;
+    }
+
+    .card-hover-sage {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover-sage:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 35px -8px rgba(82, 119, 101, 0.16);
+      border-color: rgba(136, 169, 149, 0.5);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FAF9F4;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #B0CDBB;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #88A995;
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col sage-mesh-bg selection:bg-mint-200 selection:text-forest">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
